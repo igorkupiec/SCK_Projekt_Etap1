@@ -1,0 +1,4 @@
+WORK/*.out
+WORK/*.vcd
+SYNTH/*
+!SYNTH/.gitkeep
