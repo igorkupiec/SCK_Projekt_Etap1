@@ -17,15 +17,30 @@ always @(*) begin //logika kombinacyjna
     T = 0; //ustawienie wartosci domyslnych na 0
 
     temporary_result = 0;
+    temporary_variable = 0;
 
     //operacje alu
     case (i_oper)
-        4'd0: begin //dodawanie
+        4'd0: begin //dodawanie A + B
             temporary_result = i_arg0 + i_arg1;
+            
+            if ((i_arg0[7] == i_arg1[7]) && (temporary_result[7] != i_arg0[7]))
+            //overflow wystepuje jesli MSB obu argumentow jest ten sam, a MSB wyniku jest inny
+                O = 1'b1; //overflow
+            
+            temporary_variable = {1'b0, i_arg0} + {1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
+                C = temp[8];
         end
         
-        4'd1: begin //odejmowanie
+        4'd1: begin //odejmowanie A - B
             temporary_result = i_arg0 - i_arg1;
+
+            if ((i_arg0[7] != i_arg1[7]) && (temporary_result[7] != i_arg0[7]))
+            //overflow wystepuje jesli MSB argumentow jest rozny, a MSB wyniku jest inny niz MSB pierwszego argumentu
+                O = 1'b1; //overflow
+            
+            temporary_variable = {1'b0, i_arg0} - {1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
+                C = temp[8];
         end
 
         4'd2: begin //AND
@@ -69,5 +84,12 @@ always @(*) begin //logika kombinacyjna
         default: begin
             temporary_result = 0;
         end
+    
+    if (temporary_result == 0) //flaga Z, sprawdzamy czy wynik jest rowny 0
+        Z = 1'b1;
+    
+    if (temporary_result[7] == 1'b1) //flaga N, sprawdzamy czy MSB wyniku jest 1
+        N = 1'b1;
+    
     endcase
 end
