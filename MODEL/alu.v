@@ -20,7 +20,7 @@ reg [7:0] shift_val;
 
 integer i;
 integer zeros;
-integer changes;
+reg seen_zero;
 integer loop_end;
 
 always @(*) begin //logika kombinacyjna
@@ -55,15 +55,15 @@ always @(*) begin //logika kombinacyjna
         E = 1'b0;
 
     // sprawdzanie kodu termometrowego dla flagi T
-    changes = 0;
-    for (i = 0; i < 15; i = i + 1) begin
-        if (ba[i] != ba[i+1])
-            changes = changes + 1;
+    // od LSB ciag jedynek, po pierwszym zerze juz tylko zera
+    T = 1'b1;
+    seen_zero = 1'b0;
+    for (i = 0; i < 16; i = i + 1) begin
+        if (ba[i] == 1'b0)
+            seen_zero = 1'b1;
+        else if (seen_zero)
+            T = 1'b0;
     end
-    if (changes <= 1)
-        T = 1'b1;
-    else
-        T = 1'b0;
 
     //operacje alu
     case (i_oper)
@@ -122,7 +122,7 @@ always @(*) begin //logika kombinacyjna
         4'd7: begin //count trailing ones
             loop_end = 0;
 
-            for (i = 0; i < 16; i = i + 1) begin //liczymy ilosc kolejnych zer od MSB do LSB w polaczonych argumentach
+            for (i = 0; i < 16; i = i + 1) begin //liczymy ilosc kolejnych jedynek od LSB do MSB w polaczonych argumentach
                 if (ba[i] == 1'b1 && loop_end == 0)
                     temporary_result = temporary_result + 1;
                 else
