@@ -89,7 +89,7 @@ always @(*) begin //logika kombinacyjna
             loop_end = 0;
 
             for (i = 0; i < 16; i = i + 1) begin //liczymy ilosc kolejnych zer od MSB do LSB w polaczonych argumentach
-                if (temporary_variable[15-i] == 1'b0 && loop_end == 0)
+                if (temporary_variable[16-i] == 1'b0 && loop_end == 0)
                     temporary_result = temporary_result + 1;
                 else
                     loop_end = 1;
