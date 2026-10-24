@@ -13,6 +13,7 @@ reg signed [7:0] temporary_result;
 reg O, C, Z, N, E, T;
 
 wire [7:0]  arg0_u = i_arg0; // zmienna bez znaku do przesuniecia logicznego
+wire [15:0] ba = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
 
 reg [8:0] temporary_variable;
 reg [7:0] shift_val;
@@ -39,6 +40,28 @@ always @(*) begin //logika kombinacyjna
         shift_val = -i_arg1;
     else
         shift_val = i_arg1;
+    
+    // liczenie zer dla flagi E (zero-hot)
+    zeros = 0;
+    for (i = 0; i < 16; i = i + 1) begin
+        if (ba[i] == 1'b0)
+            zeros = zeros + 1;
+    end
+    if (zeros != 1)
+        E = 1'b1;
+    else
+        E = 1'b0;
+
+    // sprawdzanie kodu termometrowego dla flagi T
+    changes = 0;
+    for (i = 0; i < 15; i = i + 1) begin
+        if (ba[i] != ba[i+1])
+            changes = changes + 1;
+    end
+    if (changes <= 1)
+        T = 1'b1;
+    else
+        T = 1'b0;
 
     //operacje alu
     case (i_oper)
@@ -94,38 +117,24 @@ always @(*) begin //logika kombinacyjna
                 temporary_result = i_arg0;
         end
 
-        4'd7: begin //count leading zeros
-            temporary_variable = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
+        4'd7: begin //count trailing ones
             loop_end = 0;
 
             for (i = 0; i < 16; i = i + 1) begin //liczymy ilosc kolejnych zer od MSB do LSB w polaczonych argumentach
-                if (temporary_variable[16-i] == 1'b0 && loop_end == 0)
+                if (ba[i] == 1'b1 && loop_end == 0)
                     temporary_result = temporary_result + 1;
                 else
                     loop_end = 1;
             end
-
-            //sprawdzamy kod temperaturowy
-            T = 1'b1;
-            for (i = temporary_result; i < 15; i = i + 1) begin
-                if (temporary_variable[15-i] != 1'b1)
-                    T = 1'b0;
-            end
         end
 
-        4'd8: begin //one hot decoder
-            temporary_variable = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
-            counter = 0;
-
-            for (i = 0; i < 16; i = i + 1) begin //sprawdzamy czy w polaczonych argumentach jest tylko jeden bit ustawiony na 1
-                if (temporary_variable[i] == 1'b1) begin
-                    counter = counter + 1;
-                    temporary_result = i; //zapisujemy indeks bitu ustawionego na 1
+        4'd8: begin //zero hot decoder
+            if (E == 1'b0) begin
+                for (i = 0; i < 16; i = i + 1) begin
+                    if (ba[i] == 1'b0)
+                        temporary_result = i;
                 end
             end
-
-            if (counter == 1) //jesli jest tylko jeden bit ustawiony na 1, to flaga E = 1
-                E = 1'b1;
         end
 
         default: begin
