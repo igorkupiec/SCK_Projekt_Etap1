@@ -2,3 +2,5 @@ WORK/*.out
 WORK/*.vcd
 SYNTH/*
 !SYNTH/.gitkeep
+WORK/*.vvp
+WORK/*.vcd
