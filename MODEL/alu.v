@@ -5,16 +5,27 @@ module alu (
     input wire signed [7:0]   i_arg1, //B
     input wire        [3:0]   i_oper, //wybór operacji
     output reg signed [7:0]   o_result, //wynik
-    output reg        [5:0]   o_flag, //flagi: O, C, Z, N, E, T
+    output reg        [5:0]   o_flag //flagi: O, C, Z, N, E, T
 );
 
+//deklaracja zmiennych pomocniczych
+reg O, C, Z, N, E, T;
+reg signed [7:0] temporary_result;
+reg [15:0] temporary_variable;
+
+integer i;
+reg loop_end;
+reg [4:0] counter;
+
 always @(*) begin //logika kombinacyjna
+
+    //ustawienie początkowych wartości zmiennych pomocniczych
     O = 0;
     C = 0;
     Z = 0;
     N = 0;
     E = 0;
-    T = 0; //ustawienie wartosci domyslnych na 0
+    T = 0;
 
     temporary_result = 0;
     temporary_variable = 0;
@@ -29,7 +40,7 @@ always @(*) begin //logika kombinacyjna
                 O = 1'b1; //overflow
             
             temporary_variable = {1'b0, i_arg0} + {1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
-                C = temp[8];
+                C = temporary_variable[8];
         end
         
         4'd1: begin //odejmowanie A - B
@@ -40,7 +51,7 @@ always @(*) begin //logika kombinacyjna
                 O = 1'b1; //overflow
             
             temporary_variable = {1'b0, i_arg0} - {1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
-                C = temp[8];
+                C = temporary_variable[8];
         end
 
         4'd2: begin //AND
@@ -74,7 +85,7 @@ always @(*) begin //logika kombinacyjna
         end
 
         4'd7: begin //count leading zeros
-            temmporary_variable = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
+            temporary_variable = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
             loop_end = 0;
 
             for (i = 0; i < 16; i = i + 1) begin //liczymy ilosc kolejnych zer od MSB do LSB w polaczonych argumentach
@@ -97,9 +108,10 @@ always @(*) begin //logika kombinacyjna
             counter = 0;
 
             for (i = 0; i < 16; i = i + 1) begin //sprawdzamy czy w polaczonych argumentach jest tylko jeden bit ustawiony na 1
-                if (temporary_variable[i] == 1'b1)
+                if (temporary_variable[i] == 1'b1) begin
                     counter = counter + 1;
                     temporary_result = i; //zapisujemy indeks bitu ustawionego na 1
+                end
             end
 
             if (counter == 1) //jesli jest tylko jeden bit ustawiony na 1, to flaga E = 1
@@ -116,7 +128,7 @@ always @(*) begin //logika kombinacyjna
     
     if (temporary_result[7] == 1'b1) //flaga N, sprawdzamy czy MSB wyniku jest 1
         N = 1'b1;
-        
+
 end
 
 always @(posedge i_clk or negedge i_rstn) begin
