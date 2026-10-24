@@ -19,8 +19,9 @@ reg [8:0] temporary_variable;
 reg [7:0] shift_val;
 
 integer i;
+integer zeros;
+integer changes;
 reg loop_end;
-reg [4:0] counter;
 
 always @(*) begin //logika kombinacyjna
 
