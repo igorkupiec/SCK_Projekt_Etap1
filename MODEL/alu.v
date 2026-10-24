@@ -112,9 +112,9 @@ always @(*) begin //logika kombinacyjna
 
         4'd6: begin //signed arithmetic shift
             if (i_arg1 > 0)
-                temporary_result = i_arg0_u <<< shift_val;
+                temporary_result = i_arg0 <<< shift_val;
             else if (i_arg1 < 0)
-                temporary_result = i_arg0_u >>> shift_val;
+                temporary_result = i_arg0 >>> shift_val;
             else
                 temporary_result = i_arg0;
         end
