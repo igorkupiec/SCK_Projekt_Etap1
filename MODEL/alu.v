@@ -74,11 +74,36 @@ always @(*) begin //logika kombinacyjna
         end
 
         4'd7: begin //count leading zeros
-            temporary_result = count_leading_zeros(i_arg0);
+            temmporary_variable = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
+            loop_end = 0;
+
+            for (i = 0; i < 16; i = i + 1) begin //liczymy ilosc kolejnych zer od MSB do LSB w polaczonych argumentach
+                if (temporary_variable[15-i] == 1'b0 && loop_end == 0)
+                    temporary_result = temporary_result + 1;
+                else
+                    loop_end = 1;
+            end
+
+            //sprawdzamy kod temperaturowy
+            T = 1'b1;
+            for (i = temporary_result; i < 15; i = i + 1) begin
+                if (temporary_variable[15-i] != 1'b1)
+                    T = 1'b0;
+            end
         end
 
         4'd8: begin //one hot decoder
-            temporary_result = one_hot_decoder(i_arg0);
+            temporary_variable = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
+            counter = 0;
+
+            for (i = 0; i < 16; i = i + 1) begin //sprawdzamy czy w polaczonych argumentach jest tylko jeden bit ustawiony na 1
+                if (temporary_variable[i] == 1'b1)
+                    counter = counter + 1;
+                    temporary_result = i; //zapisujemy indeks bitu ustawionego na 1
+            end
+
+            if (counter == 1) //jesli jest tylko jeden bit ustawiony na 1, to flaga E = 1
+                E = 1'b1;
         end
 
         default: begin
