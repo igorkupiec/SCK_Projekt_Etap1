@@ -109,12 +109,26 @@ always @(*) begin //logika kombinacyjna
         default: begin
             temporary_result = 0;
         end
-    
+    endcase
+
     if (temporary_result == 0) //flaga Z, sprawdzamy czy wynik jest rowny 0
         Z = 1'b1;
     
     if (temporary_result[7] == 1'b1) //flaga N, sprawdzamy czy MSB wyniku jest 1
         N = 1'b1;
-    
-    endcase
+        
 end
+
+always @(posedge i_clk or negedge i_rstn) begin
+    if (!i_rstn) begin
+        o_result <= 8'd0;
+        o_flag   <= 6'd0;
+    end
+    
+    else begin
+        o_result <= temporary_result;
+        o_flag   <= {O, C, Z, N, E, T};
+    end
+end
+
+endmodule
