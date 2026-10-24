@@ -9,9 +9,13 @@ module alu (
 );
 
 //deklaracja zmiennych pomocniczych
-reg O, C, Z, N, E, T;
 reg signed [7:0] temporary_result;
-reg [15:0] temporary_variable;
+reg O, C, Z, N, E, T;
+
+wire [7:0]  arg0_u = i_arg0; // zmienna bez znaku do przesuniecia logicznego
+
+reg [8:0] temporary_variable;
+reg [7:0] shift_val;
 
 integer i;
 reg loop_end;
@@ -30,6 +34,12 @@ always @(*) begin //logika kombinacyjna
     temporary_result = 0;
     temporary_variable = 0;
 
+    // wartosc bezwzgledna z B do przesuniec
+    if (i_arg1 < 0)
+        shift_val = -i_arg1;
+    else
+        shift_val = i_arg1;
+
     //operacje alu
     case (i_oper)
         4'd0: begin //dodawanie A + B
@@ -40,7 +50,7 @@ always @(*) begin //logika kombinacyjna
                 O = 1'b1; //overflow
             
             temporary_variable = {1'b0, i_arg0} + {1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
-                C = temporary_variable[8];
+            C = temporary_variable[8];
         end
         
         4'd1: begin //odejmowanie A - B
@@ -51,7 +61,7 @@ always @(*) begin //logika kombinacyjna
                 O = 1'b1; //overflow
             
             temporary_variable = {1'b0, i_arg0} - {1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
-                C = temporary_variable[8];
+            C = temporary_variable[8];
         end
 
         4'd2: begin //AND
@@ -68,18 +78,18 @@ always @(*) begin //logika kombinacyjna
 
         4'd5: begin //signed logical shift
             if (i_arg1 > 0)
-                temporary_result = i_arg0 << i_arg1;
+                temporary_result = i_arg0_u << shift_val;
             else if (i_arg1 < 0)
-                temporary_result = i_arg0 >> -i_arg1;
+                temporary_result = i_arg0_u >> shift_val;
             else
                 temporary_result = i_arg0;
         end
 
         4'd6: begin //signed arithmetic shift
             if (i_arg1 > 0)
-                temporary_result = i_arg0 <<< i_arg1;
+                temporary_result = i_arg0_u <<< shift_val;
             else if (i_arg1 < 0)
-                temporary_result = i_arg0 >>> -i_arg1;
+                temporary_result = i_arg0_u >>> shift_val;
             else
                 temporary_result = i_arg0;
         end
