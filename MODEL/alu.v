@@ -12,7 +12,7 @@ module alu (
 reg signed [7:0] temporary_result;
 reg O, C, Z, N, E, T;
 
-wire [7:0]  arg0_u = i_arg0; // zmienna bez znaku do przesuniecia logicznego
+wire [7:0]  i_arg0_u = i_arg0; // zmienna bez znaku do przesuniecia logicznego
 wire [15:0] ba = {i_arg1, i_arg0}; //polaczenie A i B w jeden 16 bitowy wektor
 
 reg [8:0] temporary_variable;
@@ -21,7 +21,7 @@ reg [7:0] shift_val;
 integer i;
 integer zeros;
 integer changes;
-reg loop_end;
+integer loop_end;
 
 always @(*) begin //logika kombinacyjna
 
@@ -35,6 +35,7 @@ always @(*) begin //logika kombinacyjna
 
     temporary_result = 0;
     temporary_variable = 0;
+    loop_end = 0;
 
     // wartosc bezwzgledna z B do przesuniec
     if (i_arg1 < 0)
