@@ -74,7 +74,7 @@ always @(*) begin //logika kombinacyjna
             //overflow wystepuje jesli MSB obu argumentow jest ten sam, a MSB wyniku jest inny
                 O = 1'b1; //overflow
             
-            temporary_variable =  $signed{1'b0, i_arg0} - $signed{1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
+            temporary_variable =  $signed({1'b0, i_arg0}) - $signed({1'b0, i_arg1}); //zmienna 9 bitowa do sprawdzenia przeniesienia
             C = temporary_variable[8];
         end
         
@@ -85,7 +85,7 @@ always @(*) begin //logika kombinacyjna
             //overflow wystepuje jesli MSB argumentow jest rozny, a MSB wyniku jest inny niz MSB pierwszego argumentu
                 O = 1'b1; //overflow
             
-            temporary_variable = $signed{1'b0, i_arg0} - $signed{1'b0, i_arg1}; //zmienna 9 bitowa do sprawdzenia przeniesienia
+            temporary_variable = $signed({1'b0, i_arg0}) - $signed({1'b0, i_arg1}); //zmienna 9 bitowa do sprawdzenia przeniesienia
             C = temporary_variable[8];
         end
 
